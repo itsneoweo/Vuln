@@ -1,0 +1,68 @@
+This usually means that your current ecosystem is unsupported officially. If you want to support it, you can implement a parser yourself
+and save in under Vuln/parsers/ with the name like {project-name}_parser.py. A corresponding entry for that ecosystem must be listed
+in the Vuln/config.json file with this schema:
+
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Generated schema for Root",
+  "type": "object",
+  "properties": {
+    "ecosystems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "detect": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "format": {
+                  "type": "string"
+                },
+                "priority": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "path",
+                "role",
+                "format",
+                "priority"
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "id",
+          "detect",
+          "files"
+        ]
+      }
+    }
+  },
+  "required": [
+    "ecosystems"
+  ]
+}
+
+For more examples, check the Vuln/config.json file.

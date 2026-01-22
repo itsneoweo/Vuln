@@ -1,10 +1,6 @@
-from pathlib import Path
 import json
-
-SCRIPT_DIR = Path(__file__).resolve().parent
-CONFIG_PATH = SCRIPT_DIR / "config.json"
-with open(CONFIG_PATH, 'r') as file:
-    CONFIG = json.loads(file.read())
+from pathlib import Path
+from globals import CONFIG
 
 def detect_ecosystem():
     ecosystems = CONFIG["ecosystems"]

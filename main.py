@@ -12,6 +12,8 @@ from rich.markdown import Markdown
 from rich import box
 from rich.rule import Rule
 
+from globals import ERRORS
+
 app = typer.Typer()
 console = Console()
 
@@ -79,32 +81,55 @@ def print_report(scan_result):
     table.add_column("Vulns", justify="right")
     table.add_column("Action", style="green")
 
-    sorted_packages = sorted(packages, key=lambda x: len(x.get('vulnerabilities', [])), reverse=True)
+    sorted_packages = sorted(packages, key=lambda x: x.get("isdirect", False), reverse=True)
+    sorted_packages = sorted(sorted_packages, key=lambda x: len(x.get('vulnerabilities', [])), reverse=True)
 
     for pkg in sorted_packages:
         vulns = pkg.get("vulnerabilities", [])
         count = len(vulns)
-        
-        if count > 0:
-            status = "[bold red]✖[/bold red]"
-            fix_versions = [v['safe_version'] for v in vulns if v['safe_version']]
-            if fix_versions:
-                action = f"Upgrade to {fix_versions[0]}" 
-            else:
-                action = "Check Details"
-            vuln_str = f"[red]{count}[/red]"
-        else:
-            status = "[bold green]✔[/bold green]"
-            action = "[dim]-[/dim]"
-            vuln_str = "[dim]0[/dim]"
 
-        table.add_row(
-            pkg.get("name"),
-            pkg.get("version"),
-            status,
-            vuln_str,
-            action
-        )
+        if pkg['isdirect']:
+            if count > 0:
+                status = "[bold red]✖[/bold red]"
+                fix_versions = [v['safe_version'] for v in vulns if v['safe_version']]
+                if fix_versions:
+                    action = f"Upgrade to {fix_versions[0]}" 
+                else:
+                    action = "Check Details"
+                vuln_str = f"[red]{count}[/red]"
+            else:
+                status = "[bold green]✔[/bold green]"
+                action = "[dim]-[/dim]"
+                vuln_str = "[dim]0[/dim]"
+
+            table.add_row(
+                pkg.get("name"),
+                pkg.get("version"),
+                status,
+                vuln_str,
+                action
+            )
+        else:
+            if count > 0:
+                status = "[red]✖[/red]"
+                fix_versions = [v["safe_version"] for v in vulns if v.get("safe_version")]
+                if fix_versions:
+                    action = f"[green]Upgrade to {fix_versions[0]}[/green]"
+                else:
+                    action = "[red]Check Details[/red]"
+                vuln_str = f"[red]{count}[/red]"
+            else:
+                status = "[dim green]✔[/dim green]"
+                action = "[dim]-[/dim]"
+                vuln_str = "[dim]0[/dim]"
+            
+            table.add_row(
+                f"[dim white]{pkg.get("name")}[/dim white]",
+                f"[dim white]{pkg.get("version")}[/dim white]",
+                status,
+                vuln_str,
+                action
+            )
 
     console.print(table)
     
@@ -117,15 +142,27 @@ def print_report(scan_result):
 
 @app.command()
 def scan():
-    file_info = resolve()
+    try:
+        file_info = resolve()
+    except Exception as e:
+        console.print()
+        console.print(f"[bold red]{e}[/bold red]")
+        console.print(ERRORS['unsupported-ecosystem'])
+        return
     
     console.print()
     console.print(f" Ecosystem : [bold cyan]{file_info['name']}[/bold cyan]")
     console.print(f" Target    : [green]{file_info['path']}[/green]")
-    
-    module = import_module(f"parsers.{file_info['name'].lower()}_parser")
-    parsed = module.parse(file_info)
 
+    try:
+        module = import_module(f"parsers.{file_info['name'].lower()}_parser")
+    except Exception as e:
+        console.print()
+        console.print(f"[bold red]{e}[/bold red]")
+        console.print(ERRORS['unsupported-ecosystem'])
+        return
+
+    parsed = module.parse(file_info)
     directpkgs = [pkg for pkg in parsed['packages'] if pkg.get('isdirect')]
     indirectpkgs = [pkg for pkg in parsed['packages'] if not pkg.get('isdirect')]
     
@@ -133,9 +170,13 @@ def scan():
     console.print()
 
     with console.status("[bold green]Querying OSV Database...", spinner="dots"):
-        scan_results = asyncio.run(detect_async(parsed))
+        try:
+            scan_results = asyncio.run(detect_async(parsed))
+            print_report(scan_results)
+        except:
+            console.print("[bold red]Unable to connect to the OSV Database.[/bold red]")
+            return
 
-    print_report(scan_results)
     
 
 if __name__ == '__main__':
