@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Schema for Dependencies",
+  "type": "object",
+  "properties": {
+    "ecosystem": {
+      "type": "string"
+    },
+    "packages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "purl": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "isdirect": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "purl",
+          "version",
+          "isdirect"
+        ]
+      }
+    }
+  },
+  "required": [
+    "ecosystem",
+    "packages"
+  ]
+}

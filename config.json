@@ -1,0 +1,56 @@
+{
+  "ecosystems": [
+    {
+      "name": "npm",
+      "detect": [
+        "package.json"
+      ],
+      "files": [
+        {
+          "path": "package-lock.json",
+          "role": "lockfile",
+          "format": "json",
+          "priority": 4
+        },
+        {
+          "path": "pnpm-lock.yaml",
+          "role": "lockfile",
+          "format": "yaml",
+          "priority": 3
+        },
+        {
+          "path": "yarn.lock",
+          "role": "lockfile",
+          "format": "yarn",
+          "priority": 2
+        },
+        {
+          "path": "package.json",
+          "role": "manifest",
+          "format": "json",
+          "priority": 1
+        }
+      ]
+    },
+    {
+      "name": "Go",
+      "detect": [
+        "go.mod"
+      ],
+      "files": [
+        {
+          "path": "go.mod",
+          "role": "manifest",
+          "format": "gomod",
+          "priority": 2
+        },
+        {
+          "path": "go.sum",
+          "role": "checksum",
+          "format": "text",
+          "priority": 1
+        }
+      ]
+    }
+  ]
+}
