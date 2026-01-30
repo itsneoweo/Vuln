@@ -12,39 +12,39 @@ def _npm_purl(name: str, version: str) -> str:
     return f"pkg:npm/{name}@{version}"
 
 
-def parse(file_info):
-    ecosystem = file_info.get('name')
-    file_path = file_info.get('path')
-    file_format = file_info.get('format')
-    file_role = file_info.get('role')
+def parse(ecosystem_info):
+    ecosystem_name = ecosystem_info.get('name')
+    dependency_path = ecosystem_info.get('path')
+    dependency_format = ecosystem_info.get('format')
+    file_role = ecosystem_info.get('role')
 
     output_data = {
-        "ecosystem": ecosystem,
+        "ecosystem": ecosystem_name,
         "packages": []
     }
 
-    if not os.path.exists(file_path):
-        print(f"Error: File not found at {file_path}")
+    if not os.path.exists(dependency_path):
+        print(f"Error: File not found at {dependency_path}")
         return output_data
 
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(dependency_path, 'r', encoding='utf-8') as f:
             content = f.read()
 
         packages = []
 
-        if file_format == 'json':
+        if dependency_format == 'json':
             json_content = json.loads(content)
 
-            if file_role == 'manifest' or file_path.endswith('package.json'):
+            if file_role == 'manifest' or dependency_path.endswith('package.json'):
                 packages = _parse_package_json(json_content)
             elif file_role == 'lockfile':
                 packages = _parse_npm_lock(json_content)
 
-        elif file_format == 'yarn':
+        elif dependency_format == 'yarn':
             packages = _parse_yarn_lock(content)
 
-        elif file_format == 'yaml':
+        elif dependency_format == 'yaml':
             if yaml:
                 yaml_content = yaml.safe_load(content)
                 packages = _parse_pnpm_lock(yaml_content)
@@ -54,7 +54,7 @@ def parse(file_info):
         output_data["packages"] = packages
 
     except Exception as e:
-        print(f"Error parsing {file_path}: {e}")
+        print(f"Error parsing {dependency_path}: {e}")
 
     return output_data
 

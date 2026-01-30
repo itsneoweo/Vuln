@@ -1,36 +1,36 @@
 import re
 import os
 
-def parse(file_info):
-    ecosystem = file_info.get('name')
-    file_path = file_info.get('path')
-    file_format = file_info.get('format')
+def parse(ecosystem_info):
+    ecosystem_name = ecosystem_info.get('name')
+    dependency_path = ecosystem_info.get('path')
+    dependency_format = ecosystem_info.get('format')
 
     output_data = {
-        "ecosystem": ecosystem,
+        "ecosystem": ecosystem_name,
         "packages": []
     }
 
-    if not os.path.exists(file_path):
-        print(f"Error: File not found at {file_path}")
+    if not os.path.exists(dependency_path):
+        print(f"Error: File not found at {dependency_path}")
         return output_data
 
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(dependency_path, 'r', encoding='utf-8') as f:
             content = f.read()
 
         packages = []
 
-        if file_format == 'gomod':
+        if dependency_format == 'gomod':
             packages = _parse_go_mod(content)
 
-        elif file_format == 'text' and file_info.get('role') == 'checksum':
+        elif dependency_format == 'text' and ecosystem_info.get('role') == 'checksum':
             packages = _parse_go_sum(content)
 
         output_data["packages"] = packages
 
     except Exception as e:
-        print(f"Error parsing {file_path}: {e}")
+        print(f"Error parsing {dependency_path}: {e}")
 
     return output_data
 

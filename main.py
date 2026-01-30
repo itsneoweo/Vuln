@@ -1,5 +1,6 @@
 import typer
 import asyncio
+import json
 from detector import detect_async
 from resolver import resolve
 from importlib import import_module
@@ -139,11 +140,37 @@ def print_report(scan_result):
     else:
         console.print(f"\n[bold red]Found {total_vulns} vulnerabilities in {len(vulnerable_pkgs)} packages.[/bold red]️\n")
 
-
-@app.command()
-def scan():
+def run():
     try:
-        file_info = resolve()
+        ecosystem_info = resolve()
+    except Exception as e:
+        return json.dumps({
+            "error": "unsupported-ecosystem"
+        })
+    
+    try:
+        module = import_module(f"parsers.{ecosystem_info['name'].lower()}_parser")
+    except Exception as e:
+        return json.dumps({
+            "error": "parser-module-not-found"
+        })
+
+    parsed = module.parse(ecosystem_info)
+    directpkgs = [pkg for pkg in parsed['packages'] if pkg.get('isdirect')]
+    indirectpkgs = [pkg for pkg in parsed['packages'] if not pkg.get('isdirect')]
+
+    try:
+        scan_results = asyncio.run(detect_async(parsed))
+        return json.dumps(scan_results)
+    except:
+        return json.dumps({
+            "error": "osv-connection-failed"
+        })
+
+@app.command(name="run")
+def run_pretty_print():
+    try:
+        ecosystem_info = resolve()
     except Exception as e:
         console.print()
         console.print(f"[bold red]{e}[/bold red]")
@@ -151,18 +178,18 @@ def scan():
         return
     
     console.print()
-    console.print(f" Ecosystem : [bold cyan]{file_info['name']}[/bold cyan]")
-    console.print(f" Target    : [green]{file_info['path']}[/green]")
+    console.print(f" Ecosystem : [bold cyan]{ecosystem_info['name']}[/bold cyan]")
+    console.print(f" Target    : [green]{ecosystem_info['path']}[/green]")
 
     try:
-        module = import_module(f"parsers.{file_info['name'].lower()}_parser")
+        module = import_module(f"parsers.{ecosystem_info['name'].lower()}_parser")
     except Exception as e:
         console.print()
         console.print(f"[bold red]{e}[/bold red]")
         console.print(ERRORS['unsupported-ecosystem'])
         return
 
-    parsed = module.parse(file_info)
+    parsed = module.parse(ecosystem_info)
     directpkgs = [pkg for pkg in parsed['packages'] if pkg.get('isdirect')]
     indirectpkgs = [pkg for pkg in parsed['packages'] if not pkg.get('isdirect')]
     
@@ -176,8 +203,6 @@ def scan():
         except:
             console.print("[bold red]Unable to connect to the OSV Database.[/bold red]")
             return
-
-    
 
 if __name__ == '__main__':
     app()

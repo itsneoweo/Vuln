@@ -1,0 +1,206 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Go dependency vulnerability report",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "required": [
+            "ecosystem",
+            "packages"
+        ],
+        "properties": {
+            "ecosystem": {
+                "type": "string"
+            },
+            "packages": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "required": [
+                        "name",
+                        "purl",
+                        "version",
+                        "isdirect",
+                        "vulnerabilities"
+                    ],
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "purl": {
+                            "type": "string"
+                        },
+                        "version": {
+                            "type": "string"
+                        },
+                        "isdirect": {
+                            "type": "boolean"
+                        },
+                        "vulnerabilities": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/$defs/vulnerability"
+                            }
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            }
+        },
+        "additionalProperties": false
+    },
+    "$defs": {
+        "vulnerability": {
+            "type": "object",
+            "required": [
+                "id",
+                "summary",
+                "details",
+                "affected"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "summary": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "string"
+                },
+                "affected": {
+                    "type": "object",
+                    "required": [
+                        "package",
+                        "ranges"
+                    ],
+                    "properties": {
+                        "package": {
+                            "type": "object",
+                            "required": [
+                                "name",
+                                "ecosystem",
+                                "purl"
+                            ],
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "ecosystem": {
+                                    "type": "string"
+                                },
+                                "purl": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "ranges": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "required": [
+                                    "type",
+                                    "events"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string"
+                                    },
+                                    "events": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "introduced": {
+                                                    "type": "string"
+                                                },
+                                                "fixed": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "minProperties": 1,
+                                            "additionalProperties": false
+                                        }
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "ecosystem_specific": {
+                    "type": "object",
+                    "properties": {
+                        "imports": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "required": [
+                                    "path",
+                                    "symbols"
+                                ],
+                                "properties": {
+                                    "path": {
+                                        "type": "string"
+                                    },
+                                    "symbols": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        }
+                    },
+                    "additionalProperties": true
+                },
+                "database_specific": {
+                    "type": "object",
+                    "properties": {
+                        "source": {
+                            "type": "string",
+                            "format": "uri"
+                        }
+                    },
+                    "additionalProperties": true
+                },
+                "published": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "modified": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "references": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "type",
+                            "url"
+                        ],
+                        "properties": {
+                            "type": {
+                                "type": "string"
+                            },
+                            "url": {
+                                "type": "string",
+                                "format": "uri"
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "safe_version": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
