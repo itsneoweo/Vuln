@@ -1,13 +1,16 @@
 import typer
 import asyncio
 import json
+from typing import Optional
 from detector import detect_async
-from resolver import resolve
+from loc_resolver import resolve as resolve_loc
+from git_resolver import resolve as resolve_git
 from importlib import import_module
+from importlib import import_module
+
+from rich.panel import Panel
 from rich.console import Console
 from rich.table import Table
-from importlib import import_module
-from rich.panel import Panel
 from rich.text import Text
 from rich.markdown import Markdown
 from rich import box
@@ -140,9 +143,14 @@ def print_report(scan_result):
     else:
         console.print(f"\n[bold red]Found {total_vulns} vulnerabilities in {len(vulnerable_pkgs)} packages.[/bold red]️\n")
 
-def run():
+def run(git: bool = False, link: Optional[str] = None):
     try:
-        ecosystem_info = resolve()
+        if git:
+            if not link:
+                raise Exception("Link required")
+            ecosystem_info = resolve_git(link)
+        else:
+            ecosystem_info = resolve_loc()
     except Exception as e:
         return json.dumps({
             "error": "unsupported-ecosystem"
@@ -168,9 +176,14 @@ def run():
         })
 
 @app.command(name="run")
-def run_pretty_print():
+def run_pretty_print(git: bool = False, link: Optional[str] = None):
     try:
-        ecosystem_info = resolve()
+        if git:
+            if not link:
+                raise Exception("Link required")
+            ecosystem_info = resolve_git(link)
+        else:
+            ecosystem_info = resolve_loc()
     except Exception as e:
         console.print()
         console.print(f"[bold red]{e}[/bold red]")
