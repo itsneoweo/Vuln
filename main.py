@@ -175,7 +175,6 @@ def run(git: bool = False, link: Optional[str] = None):
             "error": "osv-connection-failed"
         })
 
-@app.command(name="run")
 def run_pretty_print(git: bool = False, link: Optional[str] = None):
     try:
         if git:
@@ -216,6 +215,20 @@ def run_pretty_print(git: bool = False, link: Optional[str] = None):
         except:
             console.print("[bold red]Unable to connect to the OSV Database.[/bold red]")
             return
+
+import time
+
+@app.command()
+def scan(git: bool = False, link: Optional[str] = None, json: bool = False):
+    if json:
+        print(run(git, link))
+    else:
+        start_time = time.perf_counter()
+        run_pretty_print(git, link)
+        end_time = time.perf_counter()
+        execution_time = end_time - start_time
+        console.print(f"[bold green]Execution Time: {execution_time}s[/bold green]")
+
 
 if __name__ == '__main__':
     app()
