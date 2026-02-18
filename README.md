@@ -2,6 +2,8 @@
 
 A no-nonsense vulnerability scanner for your dependencies. It parses your package manifests (like `package.json`, `requirements.txt`, etc.) and queries the [OSV database](https://osv.dev/) asynchronously to find known security flaws.
 
+![example output](example.png)
+
 ## Features
 
 - **Auto-detection**: Finds supported manifest files in your current directory automatically.
@@ -12,12 +14,14 @@ A no-nonsense vulnerability scanner for your dependencies. It parses your packag
 ## Setup
 
 1. **Clone the repo:**
+
    ```bash
    git clone https://github.com/itsneoweo/Vuln.git
    cd Vuln
    ```
 
 2. **Create a virtual environment:**
+
    ```bash
    python -m venv venv
    source venv/bin/activate  # Windows: venv\Scripts\activate
@@ -38,12 +42,13 @@ python main.py scan
 ```
 
 The tool will:
+
 1. Detect your lockfile or manifest.
 2. Parse the dependency tree.
 3. Check against the OSV database.
 4. Print a report with upgrade suggestions.
 
-## Make it usable (The Alias)
+## Make it usable
 
 Typing the full path to the python script every time is annoying. Add an alias to your shell configuration (`.bashrc`, `.zshrc`, etc.) to run it from anywhere.
 
@@ -55,11 +60,13 @@ alias vuln="/absolute/path/to/Vuln/venv/bin/python /absolute/path/to/Vuln/main.p
 ```
 
 **Reload your shell:**
+
 ```bash
 source ~/.zshrc  # or ~/.bashrc
 ```
 
 **Now just run:**
+
 ```bash
 vuln scan
 ```
